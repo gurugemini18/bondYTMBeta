@@ -63,17 +63,21 @@ If you cannot find a value, use a reasonable default or null. Ensure the respons
             });
             
             const textResponse = response.text;
-            const jsonMatch = textResponse.match(/```json\n([\s\S]*?)\n```/);
-            
-            if (jsonMatch && jsonMatch[1]) {
-                const parsedResults = JSON.parse(jsonMatch[1]);
-                if (Array.isArray(parsedResults) && parsedResults.length > 0) {
-                     setResults(parsedResults);
+            if (textResponse) {
+                const jsonMatch = textResponse.match(/```json\n([\s\S]*?)\n```/);
+                
+                if (jsonMatch && jsonMatch[1]) {
+                    const parsedResults = JSON.parse(jsonMatch[1]);
+                    if (Array.isArray(parsedResults) && parsedResults.length > 0) {
+                         setResults(parsedResults);
+                    } else {
+                        setError('No bonds found matching your criteria.');
+                    }
                 } else {
-                    setError('No bonds found matching your criteria.');
+                    setError('Could not parse bond data from the response. Please try again.');
                 }
             } else {
-                setError('Could not parse bond data from the response. Please try again.');
+                setError('Received an empty response. Please try a different search.');
             }
 
         } catch (err) {

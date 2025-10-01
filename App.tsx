@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import YtmCalculator from './components/YtmCalculator';
 import { BondInputState } from './types';
 
