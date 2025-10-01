@@ -112,13 +112,26 @@ const YtmCalculator: React.FC<YtmCalculatorProps> = ({ bondInputs, setBondInputs
     };
     
     const handleBondSelect = (bond: BondSearchResult) => {
+        // The AI model can sometimes return null or incorrectly formatted data.
+        // This function sanitizes the selected bond data before updating the state
+        // to ensure the application remains stable.
+        if (!bond) return;
+
+        const parseNumericInput = (value: any, defaultValue: number): number => {
+            if (value === null || typeof value === 'undefined') {
+                return defaultValue;
+            }
+            const num = parseFloat(value);
+            return isNaN(num) ? defaultValue : num;
+        };
+
         setBondInputs(prev => ({
             ...prev,
-            faceValue: bond.faceValue,
-            marketPrice: bond.marketPrice,
-            couponRate: bond.couponRate,
-            couponFrequency: bond.couponFrequency,
-            maturityDate: bond.maturityDate,
+            faceValue: parseNumericInput(bond.faceValue, prev.faceValue),
+            marketPrice: parseNumericInput(bond.marketPrice, prev.marketPrice),
+            couponRate: parseNumericInput(bond.couponRate, prev.couponRate),
+            couponFrequency: parseNumericInput(bond.couponFrequency, prev.couponFrequency),
+            maturityDate: (bond.maturityDate && typeof bond.maturityDate === 'string') ? bond.maturityDate : prev.maturityDate,
         }));
         setIsAdvancedOpen(true);
     };
