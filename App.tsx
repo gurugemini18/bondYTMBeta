@@ -12,12 +12,20 @@ function App() {
     tdsRate: 10,
   });
 
-  const parts = bondInputs.maturityDate.split('-').map(p => parseInt(p, 10));
-  const maturityDateUTC = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-  const day = maturityDateUTC.getUTCDate();
-  const month = maturityDateUTC.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }).toUpperCase();
-  const year = maturityDateUTC.getUTCFullYear().toString().slice(-2);
-  const formattedMaturityDate = `${day}-${month}-${year}`;
+  let formattedMaturityDate = 'N/A';
+  if (bondInputs.maturityDate && typeof bondInputs.maturityDate === 'string') {
+    const parts = bondInputs.maturityDate.split('-').map(p => parseInt(p, 10));
+    if (parts.length === 3 && !parts.some(isNaN)) {
+      const maturityDateUTC = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+      if (!isNaN(maturityDateUTC.getTime())) {
+        const day = maturityDateUTC.getUTCDate();
+        const month = maturityDateUTC.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }).toUpperCase();
+        const year = maturityDateUTC.getUTCFullYear().toString().slice(-2);
+        formattedMaturityDate = `${day}-${month}-${year}`;
+      }
+    }
+  }
+
   const headerSubText = `${bondInputs.couponRate}% BOND ${formattedMaturityDate}`;
 
   return (
