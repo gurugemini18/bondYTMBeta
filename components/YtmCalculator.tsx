@@ -137,17 +137,20 @@ const YtmCalculator: React.FC<YtmCalculatorProps> = ({ bondInputs, setBondInputs
     };
 
     const displayValues = useMemo(() => {
-        if (!result) return { amountToInvest: 0, totalCouponPayments: 0, tdsAmount: 0, maturityAmount: 0, totalReceivable: 0, profit: 0, monthlyRate: 0 };
+        if (!result) return { amountToInvest: 0, totalCouponPayments: 0, tdsAmount: 0, maturityAmount: 0, totalReceivable: 0, preTaxProfit: 0, postTaxProfit: 0, monthlyRate: 0 };
         
         const amountToInvest = bondInputs.marketPrice * quantity;
         const totalCouponPayments = result.totalCouponPayments * quantity;
         const tdsAmount = totalCouponPayments * (bondInputs.tdsRate / 100);
         const maturityAmount = bondInputs.faceValue * quantity;
         const totalReceivable = (totalCouponPayments - tdsAmount) + maturityAmount;
-        const profit = totalReceivable - amountToInvest;
+        
+        const preTaxProfit = (totalCouponPayments + maturityAmount) - amountToInvest;
+        const postTaxProfit = totalReceivable - amountToInvest;
+        
         const monthlyRate = (Math.pow(1 + result.ytmEffectiveAnnual, 1/12) - 1);
 
-        return { amountToInvest, totalCouponPayments, tdsAmount, maturityAmount, totalReceivable, profit, monthlyRate };
+        return { amountToInvest, totalCouponPayments, tdsAmount, maturityAmount, totalReceivable, preTaxProfit, postTaxProfit, monthlyRate };
     }, [result, quantity, bondInputs]);
     
     const formatCurrency = (value: number) => `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -192,7 +195,8 @@ const YtmCalculator: React.FC<YtmCalculatorProps> = ({ bondInputs, setBondInputs
                                     <DetailRow label="Coupon Payments" value={formatCurrency(displayValues.totalCouponPayments)} description="Bond coupon payments with TDS deducted to be credited directly to your bank account." />
                                     <DetailRow label={`${bondInputs.tdsRate}% TDS`} value={formatCurrency(displayValues.tdsAmount)} description={`The issuer will withhold ${bondInputs.tdsRate}% Tax Deducted at Source (TDS) from the coupon payment amount.`} />
                                     <DetailRow label="Maturity Amount" value={formatCurrency(displayValues.maturityAmount)} description="Amount the investor will receive on the maturity date." />
-                                    <DetailRow label="Profit" value={formatCurrency(displayValues.profit)} description="The total pre-tax gain on your investment (Total Coupons + Maturity Amount - Amount to Invest)." />
+                                    <DetailRow label="Pre-tax Profit" value={formatCurrency(displayValues.preTaxProfit)} description="The total gain on your investment before tax deductions (Total Coupons + Maturity Amount - Amount to Invest)." />
+                                    <DetailRow label="Post-tax Profit" value={formatCurrency(displayValues.postTaxProfit)} description="The total gain after TDS deduction (Pre-tax Profit - TDS Amount)." />
                                 </div>
                             )}
                         </div>
